@@ -1,2 +1,2 @@
 # OS
-Operativni sistemi - Elfak Niš
+Operativni sistemi - Zadaci sa laboratorijskih vežbi i blanketa
