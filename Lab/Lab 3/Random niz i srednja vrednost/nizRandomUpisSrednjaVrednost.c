@@ -9,6 +9,8 @@
 
 #define N 5
 
+double niz[N];
+
 sem_t negativni, srednjaVr;
 
 void stampajNiz(double *niz, char *poruka)
@@ -21,23 +23,19 @@ void stampajNiz(double *niz, char *poruka)
 
 void *nit1(void *arg)
 {
-    double *niz = (double *)arg;
-
     sem_wait(&negativni);
 
     for (int i = 0; i < N; i++)
         if (niz[i] < 0)
             niz[i] = abs(niz[i]);
 
-    stampajNiz(niz, "posle apsolutnih vr");
+    stampajNiz(niz, "posle apsolutnih vr:");
 
     sem_post(&srednjaVr);
 }
 
 void *nit2(void *arg)
 {
-    double *niz = (double *)arg;
-
     sem_wait(&srednjaVr);
 
     double suma = 0;
@@ -49,7 +47,6 @@ void *nit2(void *arg)
 
 int main()
 {
-    double niz[N];
     srand(time(NULL));
 
     for (int i = 0; i < N; i++)
@@ -61,8 +58,8 @@ int main()
     sem_init(&negativni, 0, 1);
     sem_init(&srednjaVr, 0, 0);
 
-    pthread_create(&t1, NULL, (void *)nit1, &niz);
-    pthread_create(&t2, NULL, (void *)nit2, &niz);
+    pthread_create(&t1, NULL, (void *)nit1, NULL);
+    pthread_create(&t2, NULL, (void *)nit2, NULL);
 
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
