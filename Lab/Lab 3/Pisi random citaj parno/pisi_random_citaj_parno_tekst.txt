@@ -1,0 +1,1 @@
+Korišćenjem programskom jezika C napisati Linux program u kome dve niti pristupaju deljivom celobrojnom nizu. Prva nit periodično (na 3 s) slučajno odabranom elementu niza dodaje slučajno generisanu celobrojnu vrednost iz opsega [-10 : 10]. Druga nit štampa elemente niza samo ukoliko je njihova suma (nakon izmene od strane prve niti) paran broj.

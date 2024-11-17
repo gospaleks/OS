@@ -1,0 +1,1 @@
+Korišćenjem programskom jezika C kreirati Linux program koji na standardnom izlazu štampa velika i mala slova abecede u sledećem redosledu: aAbBcC...zZ. Pri tome mala slova štampa jedna nit, a velika slova druga nit. Sinhronizovati niti tako da se slova abecede na ekranu štampaju pravilnim redosledom.
