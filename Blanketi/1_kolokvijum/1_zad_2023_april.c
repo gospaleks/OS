@@ -24,6 +24,7 @@ void *parnaMesta(void *arg)
 
         sem_post(&provera);
     }
+    return NULL;
 }
 
 void *neparnaMesta(void *arg)
@@ -37,6 +38,7 @@ void *neparnaMesta(void *arg)
 
         sem_post(&provera);
     }
+    return NULL;
 }
 
 int main()
