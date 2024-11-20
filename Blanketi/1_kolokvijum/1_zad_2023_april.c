@@ -6,7 +6,7 @@
 /* uvek je veci od 2000 koliko sam ja testirao */
 
 #define N 10
-#define M 10
+#define M 5
 
 int niz[N];
 int zbirNiza;
