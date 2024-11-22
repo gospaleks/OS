@@ -6,11 +6,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define MAX_LEN 128
+
 sem_t glavna, ispis;
 
 void *ispisNLinija(void *arg)
 {
     int *n = (int *)arg;
+    char linija[MAX_LEN];
+
+    FILE *f = fopen("data.txt", "r");
 
     while (1)
     {
@@ -19,26 +24,25 @@ void *ispisNLinija(void *arg)
         if (*n == 99)
             break;
 
-        int pid = fork();
-        if (pid == 0)
-        {
-            char nStr[100];
-            sprintf(nStr, "%d", *n);
-            char brLinija[100] = "-";
-            strcat(brLinija, nStr);
+        // rewind vraca kursor citanja na pocetak fajla
+        // ekvivalent je fseek(f, 0, SEEK_SET);
+		// jos jedna solucija je da se fajl otvara i zatvara svaki put
+        rewind(f);
 
-            if (execlp("head", "head", brLinija, "data.txt", NULL) < 0)
-            {
-                printf("greska...\n");
-                exit(1);
-            }
-        }
-        else
+        int i = 0;
+        while (i < *n && !feof(f))
         {
-            wait(NULL);
-            sem_post(&glavna);
+            fgets(linija, MAX_LEN, f);
+            printf("%s", linija);
+            sleep(1);
+            ++i;
         }
+
+        sem_post(&glavna);
     }
+
+    fclose(f);
+
     return NULL;
 }
 
