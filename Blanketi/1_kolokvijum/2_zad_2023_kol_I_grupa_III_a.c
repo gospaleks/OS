@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #define LEN 256
 
@@ -53,25 +53,19 @@ int main(int argc, char **argv)
             exit(1);
 
         char linija[LEN];
-        while (fgets(linija, LEN, f))
-            write(pd1[1], linija, LEN);
+        char odgovor[LEN];
 
-        // ovako treba da stoji ovde a nikako dole kao sto bi mahinalno napisali
-        close(pd1[1]);
+        while (fgets(linija, LEN, f))
+        {
+			// Posalje detetu, on obradi i odma prihvataj odgovor...
+            write(pd1[1], linija, LEN);
+            read(pd2[0], odgovor, sizeof(odgovor));
+            printf("Poruka: %s\n", odgovor);
+        }
 
         fclose(f);
 
-        char odgovor[LEN];
-        while (read(pd2[0], odgovor, sizeof(odgovor)))
-            printf("Poruka: %s\n", odgovor);
-
-        printf("izasao sam iz whileee\n");
-
-        /*
-            procesi medjusobno cekaju da se oba kraja pipe-a zatvore
-            pa su oba zaglavljena na read u while petlji
-            zato gore posle upisa u pd1 zatvaramo i kraj pipe-a za upis da bismo ovo izbegli
-        */
+        close(pd1[1]);
         close(pd2[0]);
 
         wait(NULL);
