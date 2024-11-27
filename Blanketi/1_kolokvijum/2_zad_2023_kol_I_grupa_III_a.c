@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
         while (fgets(linija, LEN, f))
         {
-			// Posalje detetu, on obradi i odma prihvataj odgovor...
+			// Posalje detetu, on obradi i odma prihvataj odgovor
             write(pd1[1], linija, LEN);
             read(pd2[0], odgovor, sizeof(odgovor));
             printf("Poruka: %s\n", odgovor);
