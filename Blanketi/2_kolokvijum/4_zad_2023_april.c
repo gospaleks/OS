@@ -4,10 +4,13 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 
-void obradi(char *direktorijum)
+void obradi(char *direktorijum, int nivo, char **imeNajveceDatoteke, int *velicinaNajveceDatoteke)
 {
+    // Do nivoa 5
+    if (nivo == 5)
+        return;
+
     DIR *dp;
     if ((dp = opendir(direktorijum)) == NULL)
     {
@@ -38,23 +41,15 @@ void obradi(char *direktorijum)
 
         if (S_ISDIR(statbuf.st_mode))
         {
-            obradi(path);
+            // Svaki poziv povecava nivo
+            obradi(path, nivo + 1, imeNajveceDatoteke, velicinaNajveceDatoteke);
         }
         else if (S_ISREG(statbuf.st_mode))
         {
-            char *ime = dirp->d_name;
-            int n = strlen(ime);
-
-            // Proveri da li se zavrsava sa '.sh' (glup nacin al radi)
-            if (n > 3 && ime[n - 1] == 'h' && ime[n - 2] == 's' && ime[n - 3] == '.')
+            if (statbuf.st_size > *velicinaNajveceDatoteke)
             {
-                int pid = fork();
-                if (pid == 0)
-                {
-                    if (execlp("sh", "sh", path, NULL) < 0)
-                        exit(1);
-                }
-                printf("Izvrsava se: %s\n", ime);
+                *velicinaNajveceDatoteke = statbuf.st_size;
+                strcpy(*imeNajveceDatoteke, path);
             }
         }
     }
@@ -64,11 +59,18 @@ int main(int argc, char **argv)
 {
     if (argc != 2)
     {
-        printf("Neodgovarajuci broj argumenata.\n");
+        printf("Neodgovarajuci broj argumenta.\n");
         exit(1);
     }
 
-    obradi(argv[1]);
+    // U ove promenljive ce f-ja obradi da upise rezultat
+    char *imeNajveceDatoteke = (char *)malloc(255 * sizeof(char));
+    int velicinaNajveceDatoteke = -1;
+
+    obradi(argv[1], 0, &imeNajveceDatoteke, &velicinaNajveceDatoteke);
+    printf("Najveca datoteka: %s - %d B\n", imeNajveceDatoteke, velicinaNajveceDatoteke);
+
+    free(imeNajveceDatoteke);
 
     return 0;
 }
