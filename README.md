@@ -6,5 +6,5 @@
 ##
 
 ### Elektronski fakultet Univerziteta u Nišu
-smer: Računarstvo i informatika<br/>
+smer: računarstvo i informatika<br/>
 semestar: 5
