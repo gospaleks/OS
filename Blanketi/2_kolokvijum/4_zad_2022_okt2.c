@@ -66,5 +66,7 @@ int main(int argc, char **argv)
 
     printf("Fajl pronadjen na lokaciji: %s, velicina: %d\n", lokacija, velicina);
 
+    free(lokacija);
+
     return 0;
 }
