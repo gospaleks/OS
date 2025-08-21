@@ -15,7 +15,6 @@ struct mymsgbuf
 {
     long tip;
     int broj;
-    int prioritet;
 };
 
 int main()
@@ -34,18 +33,17 @@ int main()
 
         while (1)
         {
-            buff.tip = 1;
             buff.broj = rand() % 1000;
 
             if (buff.broj < 10)
-                buff.prioritet = 1;
+                buff.tip = 1;
             else if (buff.broj < 100)
-                buff.prioritet = 2;
+                buff.tip = 2;
             else
-                buff.prioritet = 3;
+                buff.tip = 3;
 
             msgsnd(msqid, &buff, sizeof(buff) - sizeof(long), 0);
-            msgrcv(msqid, &buff, sizeof(buff) - sizeof(long), 2, 0);
+            msgrcv(msqid, &buff, sizeof(buff) - sizeof(long), 4, 0);
 
             if (buff.broj == -1)
                 break;
@@ -62,21 +60,22 @@ int main()
 
         while (suma1 + suma2 + suma3 <= 50000)
         {
-            msgrcv(msqid, &buff, sizeof(buff) - sizeof(long), 1, 0);
+            msgrcv(msqid, &buff, sizeof(buff) - sizeof(long), 0, 0);
 
-            if (buff.prioritet == 1)
+            if (buff.tip == 1)
                 suma1 += buff.broj;
-            else if (buff.prioritet == 2)
+            else if (buff.tip == 2)
                 suma2 += buff.broj;
             else
                 suma3 += buff.broj;
 
-            buff.tip = 2;
+            buff.tip = 4;
             msgsnd(msqid, &buff, sizeof(buff) - sizeof(long), 0);
         }
 
         printf("suma1: %d, suma2: %d, suma3: %d, ukupno: %d\n", suma1, suma2, suma3, suma1 + suma2 + suma3);
 
+        buff.tip = 4;
         buff.broj = -1;
         msgsnd(msqid, &buff, sizeof(buff) - sizeof(long), 0);
     }
