@@ -6,8 +6,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-// argv[1] - prvi direktorijum (pretpostavljamo da nema poddirektorijume)
-// argv[2] - drugi direktorijum
+// VERZIJA 1 - manje optimalna (objasnjeno u v2 zasto) 
 
 void traziDatoteku(char* direktorijum, char* ime, int velicina)
 {
@@ -52,7 +51,7 @@ void traziDatoteku(char* direktorijum, char* ime, int velicina)
     }
 }
 
-// argv[1] - prvi direktorijum (pretpostavljamo da nema poddirektorijume)
+// argv[1] - prvi direktorijum (pretpostavljamo da nema poddirektorijume, a i da ima mi ih preskacemo)
 // argv[2] - drugi direktorijum
 
 int main(int argc, char **argv)
