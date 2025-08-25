@@ -25,7 +25,7 @@ typedef struct
     long int velicina;
 } FajlInfo;
 
-// prebrojava samo koliko ima fajlova da bi mogao da napravim dinamicki niz struktura 
+// prebrojava samo koliko ima fajlova u prvom direktorijumu da bi mogao da napravim dinamicki niz struktura 
 // sa tacno toliko mesta koja kasnije popunjavam
 int prebrojFajlove(char* direktorijum) 
 {
@@ -111,6 +111,7 @@ void ucitajFajlove(char* direktorijum, FajlInfo* niz)
     }
 }
 
+// trazi iste fajlove u drugom direktorijumu
 void traziDatoteku(char* direktorijum, FajlInfo* niz, int brojFajlova)
 {
     DIR *dp;
