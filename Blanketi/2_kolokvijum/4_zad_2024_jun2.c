@@ -10,23 +10,20 @@
 
 #define S1_KEY 10101
 #define S2_KEY 10102
+
 #define SHARED_MEM_KEY 10101
+
+#define N 10
 
 union semun {
     int val;
 };
 
-struct data
-{
-    int niz[10];
-    int flag;
-};
-
 int main()
 {
     // Kreiranje semafora
-    int sem1id = semget((key_t)S1_KEY, 2, 0666 | IPC_CREAT);
-    int sem2id = semget((key_t)S2_KEY, 2, 0666 | IPC_CREAT);
+    int sem1id = semget((key_t)S1_KEY, 1, 0666 | IPC_CREAT);
+    int sem2id = semget((key_t)S2_KEY, 1, 0666 | IPC_CREAT);
 
     // Inicijalizacija semafora
     union semun semopts;
@@ -39,42 +36,37 @@ int main()
     struct sembuf sem_wait = {0, -1, 0};
     struct sembuf sem_post = {0, 1, 0};
 
-    // Kreiranje deljene memorije velicine 2 int-a
-    int shmemid = shmget(SHARED_MEM_KEY, sizeof(struct data), IPC_CREAT | 0666);
+    // Kreiranje deljene memorije velicine N+1 int-a jer poslednji koristimo kao flag za kraj
+    int shmemid = shmget(SHARED_MEM_KEY, (N + 1) * sizeof(int), IPC_CREAT | 0666);
 
     int pid = fork();
     if (pid != 0)
     {
         // Mapiranje deljene memorije
-        struct data *shmptr = (struct data *)shmat(shmemid, NULL, 0);
+        int *shmptr = (int *)shmat(shmemid, NULL, 0);
 
         FILE *f = fopen("brojevi.txt", "r");
         if (f == 0)
             exit(1);
 
-        shmptr->flag = 0;
-        while (shmptr->flag != 1)
+        while (1)
         {
             semop(sem1id, &sem_wait, 1);
 
-            int brProcitanih = 0;
+            int i = 0;
+            while (i < N && fscanf(f, "%d", &shmptr[i]) == 1)
+                ++i;
 
-            while (brProcitanih < 10)
+            if (i < N)
             {
-                if (fscanf(f, "%d", &shmptr->niz[brProcitanih]) == EOF)
-                {
-                    // Oznaci da je kraj
-                    shmptr->flag = 1;
+                while (i < N)
+                    shmptr[i++] = 0;
 
-                    // Dopuni nulama
-                    if (brProcitanih != 0)
-                        while (brProcitanih < 10)
-                            shmptr->niz[brProcitanih++] = 0;
+                shmptr[N] = -1;
 
-                    break;
-                }
+                semop(sem2id, &sem_post, 1);
 
-                ++brProcitanih;
+                break;
             }
 
             semop(sem2id, &sem_post, 1);
@@ -86,29 +78,26 @@ int main()
 
         // Izbacivanje deljene memorije iz adresnog prostora
         shmdt(shmptr);
-
-        semctl(sem1id, 0, IPC_RMID, 0); // unisti semafor 1
-        semctl(sem2id, 0, IPC_RMID, 0); // unisti semafor 2
-        shmctl(shmemid, 0, IPC_RMID);   // unisti shared memory
     }
     else
     {
         // Mapiranje deljene memorije
-        struct data *shmptr = (struct data *)shmat(shmemid, NULL, 0);
+        int *shmptr = (int *)shmat(shmemid, NULL, 0);
 
-        shmptr->flag = 0;
-        while (shmptr->flag != 1)
+        while (1)
         {
             semop(sem2id, &sem_wait, 1);
 
-            // Ako je kraj i zadnji nije 0 znaci da nije bilo dopune i to je vec ispisano
-            // ako bi se i tad ispisalo imali bi ponovljen niz
-            if (shmptr->flag == 1 && shmptr->niz[9] != 0)
-                break;
+            int suma = 0;
+            for (int i = 0; i < N; ++i)
+            {
+                printf("%3d ", shmptr[i]);
+                suma += shmptr[i];
+            }
+            printf(" -> suma: %d\n", suma);
 
-            for (int i = 0; i < 10; ++i)
-                printf("%d ", shmptr->niz[i]);
-            printf("\n");
+            if (shmptr[N] == -1)
+                break;
 
             semop(sem1id, &sem_post, 1);
         }
@@ -118,4 +107,8 @@ int main()
 
         return 0;
     }
+
+    semctl(sem1id, 0, IPC_RMID, 0); // unisti semafor 1
+    semctl(sem2id, 0, IPC_RMID, 0); // unisti semafor 2
+    shmctl(shmemid, 0, IPC_RMID);   // unisti shared memory
 }
